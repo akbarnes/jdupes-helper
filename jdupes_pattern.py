@@ -1,4 +1,4 @@
-import argparse, os.path, logging, toml, json
+import argparse, os.path, logging, json
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -6,12 +6,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument('duplicates')
 parser.add_argument('-m','--master', default='C:\\')
 parser.add_argument('-s','--slave', default='H:\\')
+parser.add_argument('-p','--pattern', default=None)
 parser.add_argument('-b','--batch')
 args = parser.parse_args()
 
 # master_path = args.master.replace('\\','\\\\')
 logging.debug('master_path = ' + args.master)
 logging.debug('slave_path = ' + args.slave)
+logging.debug('pattern = ' + args.pattern)
 
 with open(args.duplicates) as f:
     dups_str = f.read()
@@ -28,18 +30,22 @@ dup_sets = [x.split('\n') for x in dup_set_strs]
 matching_sets = []
 
 for dset in dup_sets:
-    has_master = False
-    has_slave = False
+    master_paths = set()
+    pattern_paths = set()
 
     for dpath in dset:
         # logging.debug('dpath = ' + dpath)
         if dpath.startswith(args.master):
-            has_master = True
+            master_paths.add(dpath)
+            # logging.debug('Adding {} to master'.format(dpath))
 
-        if dpath.startswith(args.slave):
-            has_slave = True
+        if dpath.startswith(args.slave) and dpath.endswith(args.pattern):
+            pattern_paths.add(dpath)
+            # logging.debug('Adding {} to slave'.format(dpath))
 
-    if has_master and has_slave:
+
+    # ensure that there is will remain a duplicate in master
+    if master_paths.difference(pattern_paths) and pattern_paths:
         matching_sets.append(dset)
         # logging.debug('Duplicate set includes master & slave:')
         # logging.debug('dest = {}'.format(dset))
@@ -59,7 +65,8 @@ logging.debug('batch_file = ' + batch_file)
 
 info = {}
 info['master_path'] = args.master
-info['slave_path'] = args.slave
+info['slave_path'] = args.master
+info['pattern'] = args.pattern
 info['duplicates'] = matching_sets
 
 with open('{}.json'.format(dups_base), 'w') as f:
@@ -71,10 +78,11 @@ with open('{}.json'.format(dups_base), 'w') as f:
 with open(batch_file, 'w') as f:
     print('REM Master path: {}'.format(args.master), file=f)
     print('REM Slave path: {}\n'.format(args.slave), file=f)
+    print('REM Pattern: {}\n'.format(args.pattern), file=f)
 
     for match_set in matching_sets:
         for dpath in match_set:
-            if dpath.startswith(args.slave):
+            if dpath.startswith(args.slave) and dpath.endswith(args.pattern):
                 print('del "{}"'.format(dpath), file=f)
             elif dpath.startswith(args.master):
                 print('REM Master: {}'.format(dpath), file=f)
