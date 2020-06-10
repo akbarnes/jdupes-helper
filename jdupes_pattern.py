@@ -32,16 +32,21 @@ matching_sets = []
 for dset in dup_sets:
     master_paths = set()
     pattern_paths = set()
+    master_folders = set()
 
     for dpath in dset:
+        dp = dpath.lower()
+
         # logging.debug('dpath = ' + dpath)
-        if dpath.startswith(args.master):
-            master_paths.add(dpath)
+        if dp.startswith(args.master):
+            master_paths.add(dp)
+            master_folders.add(os.path.splitext(dp)[0])
             # logging.debug('Adding {} to master'.format(dpath))
 
-        if dpath.startswith(args.slave) and dpath.endswith(args.pattern):
-            pattern_paths.add(dpath)
-            # logging.debug('Adding {} to slave'.format(dpath))
+        if dp.startswith(args.slave) and dp.endswith(args.pattern) and (os.path.splitext(dp)[0] in master_folders):
+        # if dp.startswith(args.slave) and dp.endswith(args.pattern):
+            pattern_paths.add(dp)
+            logging.debug('Adding {} to slave'.format(dp))
 
 
     # ensure that there is will remain a duplicate in master
@@ -82,7 +87,9 @@ with open(batch_file, 'w') as f:
 
     for match_set in matching_sets:
         for dpath in match_set:
-            if dpath.startswith(args.slave) and dpath.endswith(args.pattern):
+            dp = dpath.lower()
+
+            if dp.startswith(args.slave) and dp.endswith(args.pattern):
                 print('del "{}"'.format(dpath), file=f)
             elif dpath.startswith(args.master):
                 print('REM Master: {}'.format(dpath), file=f)
