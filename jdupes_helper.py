@@ -35,7 +35,7 @@ dup_sets = [x.split('\n') for x in dup_set_strs]
 
 # # import ipdb; ipdb.set_trace()
 
-exclusions = '.git', 'PortableApps', 'Arduino', 'Repos', 'repos', 'Zotero', '$'
+exclusions = '.git', 'Arduino', 'Processing', 'Repos', 'repos', 'Zotero', '$'
 matching_sets = []
 
 for dset in dup_sets:
