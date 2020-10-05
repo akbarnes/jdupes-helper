@@ -15,7 +15,7 @@ logging.debug('master_path = ' + args.master)
 logging.debug('slave_path = ' + args.slave)
 
 comment_char = '#'
-del_cmd = 'rm'
+del_cmd = 'trash-put'
 script_ext = '.sh'
 
 if args.platform == 'windows':
@@ -35,7 +35,7 @@ dup_sets = [x.split('\n') for x in dup_set_strs]
 
 # # import ipdb; ipdb.set_trace()
 
-exclusions = '.git', 'Arduino', 'Processing', 'Repos', 'repos', 'Zotero', '$'
+exclusions = '.git', 'Arduino', 'Processing', 'Repos', 'repos', 'Zotero', '$', 'MobileSync'
 matching_sets = []
 
 for dset in dup_sets:
